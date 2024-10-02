@@ -1,3 +1,7 @@
+%This program connects with GNU Radio over TCP and reads 4 complex data streams.
+%Real-time data is used to create an adustable oscilloscope plot.
+%When you are done, use the "STOP" button on the plot to halt the program.
+
 clear, clc, close all
 format short, format compact
 
