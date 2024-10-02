@@ -7,6 +7,6 @@ for n = 1:length(FileNames)
     File = fopen(FileNames(n),'r');
     F32 = fread(File,'float32');
     fclose(File);
-    A(:,n) = reshape(F32,2,length(F32)/2)'*[1;1j];
+    A(:,n) = reshape(F32,2,length(F32)/2).'*[1;1j];
 end
 end

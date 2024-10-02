@@ -7,10 +7,11 @@
 clear, clc, close all
 format short, format compact
 
-Window = (100:150); %Range over which data is plotted.
+Window = (100:500); %Range over which data is plotted.
 
 %Read USRP data from file
-X_t = ReadF32(["RF0" "RF1" "RF2" "RF3"]).';
+%X_t = ReadF32(["RF0" "RF1" "RF2" "RF3"]).';
+X_t = ReadF32Vector("RF",4).';
 
 %Read Weights from File
 Weights = ReadF32("CalibratedWeights");
@@ -34,7 +35,7 @@ title('Weighted RF Data')
 xlabel('samples')
 ylabel('Real Component')
 legend('RF0','RF1','RF2','RF3')
-ylim([-1.1 1.1])
+ylim([-1.5 1.5])
 grid on
 
 %Calculate Phase Error

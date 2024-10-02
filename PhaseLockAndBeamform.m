@@ -6,26 +6,42 @@
 clear, clc, close all
 format short, format compact
 
+RFDataFile = "RF2GHz";
+CalibrationDataFile = "Weights2GHz";
+samp_rate = 1E6; %capture sample rate
 d = 0.5; %Wavelengths
-Window = (100:400); %Range over which data is plotted.
+Window = (100:550); %Range over which data is plotted.
 
 %Read USRP data from file
-X_t = ReadF32(["RF0" "RF1" "RF2" "RF3"]).';
+%X_t = ReadF32(["RF0" "RF1" "RF2" "RF3"]).';
+X_t = ReadF32Vector(RFDataFile,4).';
 
 %Read Weights from File
-Weights = ReadF32("CalibratedWeights");
+Weights = ReadF32(CalibrationDataFile);
 
 %Plot real part of each channel
 figure(1)
-plot(Window,real(X_t(:,Window)))
+plot(Window/samp_rate,real(X_t(:,Window)))
 title('Raw RF Data')
-xlabel('samples')
+xlabel('Time [s]')
 ylabel('Real Component')
 legend('RF0','RF1','RF2','RF3')
+xlim([Window(1)/samp_rate Window(end)/samp_rate]);
 grid on
 
 %Apply Calibrated Weights
 X_t = diag(Weights)*X_t;
+
+%Plot real part of each channel
+figure(2)
+plot(Window/samp_rate,real(X_t(:,Window)))
+title('Calibrated RF Data')
+xlabel('Time [s]')
+ylabel('Real Component')
+legend('RF0','RF1','RF2','RF3')
+xlim([Window(1)/samp_rate Window(end)/samp_rate]);
+%ylim([-1.5 1.5])
+grid on
 
 %Compute cross-correlation matrix
 Rxx = X_t*X_t'/length(X_t(1,:));
@@ -41,20 +57,24 @@ PhaseError = phase(Rxx(3,2))-AdjacentPhase; %Radians
 X_t = diag([1 1 exp(-1j*PhaseError) exp(-1j*PhaseError)])*X_t;
 
 %Plot real part of each channel with phase correction
-figure(2)
-plot(Window,real(X_t(:,Window)))
+figure(3)
+plot(Window/samp_rate,real(X_t(:,Window)))
 title('Phase Corrected RF DATA')
-xlabel('samples')
+xlabel('Time [s]')
 ylabel('Real Component')
 legend('RF0','RF1','RF2','RF3')
+xlim([Window(1)/samp_rate Window(end)/samp_rate]);
+%ylim([-1.5 1.5])
 grid on
 
 %Compute new cross-correlation matrix
 Rxx = X_t*X_t'/length(X_t(1,:));
 
 %Compute noise subspace
-[U Eigen] = eig(Rxx);
-U_n = U(:,1); %noise subspace
+[U EigVals] = eig(Rxx);
+Eigvals = diag(EigVals)';
+[SortedEigVals Indexes] = sort(Eigvals);
+U_n = U(:, Indexes(1)); %Create Noise Subspace
 
 %Compute MUSIC psuedospectrum
 Theta = -90:0.1:90;
@@ -64,36 +84,42 @@ for n = 1:length(Theta);
 end
 Pmusic = Pmusic-max(Pmusic);
 
-%Plot MUSIC pseudospectrum
-figure(3)
-plot(Theta,Pmusic)
-title('MUSIC Psuedospectrum')
-grid on
-
 %Compute AOA of signals
 [Peaks AOA] = findpeaks(Pmusic,Theta);
+
+%Plot MUSIC pseudospectrum
+figure(4)
+plot(Theta,Pmusic)
+title('MUSIC Psuedospectrum')
+xlim([-90 90])
+xline(AOA, 'r--')
+grid on
 
 %Isolate the signal coming from each direction
 for n = 1:length(AOA)
     %Find LCMV weights to null the other two signals
-    C = exp(-1j*[0:3]'*2*pi*d*sind(AOA));
-    D = zeros(3,1);
+    a = exp(1j*[0:3].'*2*pi*d*sind(AOA)); %arrival matrix
+    D = zeros(length(AOA),1);
     D(n) = 1;
-    LCMVWeights = inv(Rxx)*C*(C'*inv(Rxx)*C)^-1*D;
+    LCMVWeights = inv(Rxx)*a*(a.'*inv(Rxx)*a)^-1*D;
 
     %Apply LCMV Weights
     Y_t(n,:) = LCMVWeights.'*X_t;
     
     %Plot I-Channel
-    figure(3+n)
+    figure(4+n)
     subplot(2,1,1)
-    plot(Window,real(Y_t(n,Window)))
-    title('I-Channel')
+    plot(Window/samp_rate,real(Y_t(n,Window)))
+    title(['I-Channel at ' num2str(AOA(n)) ' Degrees'])
+    xlabel('Time [s]')
+    xlim([Window(1)/samp_rate Window(end)/samp_rate]);
     grid on
 
     %Plot Q-Channel
     subplot(2,1,2)
-    plot(Window,imag(Y_t(n,Window)), 'm')
-    title('Q-Channel')
+    plot(Window/samp_rate,imag(Y_t(n,Window)), 'm')
+    title(['Q-Channel at ' num2str(AOA(n)) ' Degrees'])
+    xlabel('Time [s]')
+    xlim([Window(1)/samp_rate Window(end)/samp_rate]);
     grid on
 end
