@@ -8,11 +8,11 @@ options:
     description: ''
     gen_cmake: 'On'
     gen_linking: dynamic
-    generate_options: no_gui
+    generate_options: qt_gui
     hier_block_src_path: '.:'
     id: Replay
     max_nouts: '0'
-    output_language: cpp
+    output_language: python
     placement: (0,0)
     qt_qss_theme: ''
     realtime_scheduling: ''
@@ -32,54 +32,6 @@ options:
     state: enabled
 
 blocks:
-- name: bandwidth
-  id: variable
-  parameters:
-    comment: ''
-    value: '100000000'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [464, 12.0]
-    rotation: 0
-    state: enabled
-- name: center_freq
-  id: variable
-  parameters:
-    comment: ''
-    value: 2e9
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [272, 12.0]
-    rotation: 0
-    state: enabled
-- name: gain
-  id: variable
-  parameters:
-    comment: ''
-    value: '60'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [384, 12.0]
-    rotation: 0
-    state: enabled
-- name: run_time
-  id: variable
-  parameters:
-    comment: ''
-    value: '10'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [560, 12.0]
-    rotation: 0
-    state: enabled
 - name: samp_rate
   id: variable
   parameters:
@@ -111,7 +63,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [8, 260.0]
+    coordinate: [8, 108.0]
     rotation: 0
     state: true
 - name: blocks_tcp_server_sink_0
@@ -129,7 +81,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [424, 276.0]
+    coordinate: [424, 124.0]
     rotation: 0
     state: enabled
 - name: blocks_throttle_0
@@ -148,7 +100,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [240, 292.0]
+    coordinate: [240, 140.0]
     rotation: 0
     state: true
 
