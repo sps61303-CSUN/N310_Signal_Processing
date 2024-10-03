@@ -21,6 +21,9 @@ PhaseWeights = [PhaseWeights; 1; abs(Rxx(4,3))./Rxx(4,3)];
 %Combine Magnitude and Phase Weights.
 Weights = MagWeights.*PhaseWeights;
 
+%Normalize Weights
+Weights = Weights./(Weights'*Weights);
+
 %Write Weights to File
 WriteF32(Weights, WeightFileName);
 end
